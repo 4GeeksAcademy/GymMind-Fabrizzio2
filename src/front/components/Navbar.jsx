@@ -1,11 +1,13 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import { useLang } from "../context/LanguageContext.jsx";
 
 const Navbar = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { store, dispatch } = useGlobalReducer();
+    const { lang, toggleLang, t } = useLang();
 
     const user = store.user || JSON.parse(sessionStorage.getItem("user"));
     const token = store.token || sessionStorage.getItem("token");
@@ -114,6 +116,21 @@ const Navbar = () => {
                     font-family: 'DM Sans', sans-serif;
                     text-decoration: none;
                 }
+                .gm-lang-toggle {
+                    background: transparent;
+                    border: 1px solid rgba(0,229,255,0.3);
+                    color: #00e5ff;
+                    padding: 4px 10px;
+                    border-radius: 6px;
+                    font-size: 12px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    font-family: 'DM Sans', sans-serif;
+                    letter-spacing: 0.5px;
+                    transition: all 0.2s;
+                    white-space: nowrap;
+                }
+                .gm-lang-toggle:hover { background: rgba(0,229,255,0.08); }
             `}</style>
 
             <nav className="gm-navbar">
@@ -124,12 +141,12 @@ const Navbar = () => {
                 <div className="gm-navbar-links">
                     {token ? (
                         <>
-                            <Link to="/dashboard" className={isActive("/dashboard")}>Dashboard</Link>
-                            <Link to="/workout" className={isActive("/workout")}>My Workout</Link>
-                            <Link to="/moodcheck" className={isActive("/moodcheck")}>Mood Check</Link>
-                            <Link to="/progress" className={isActive("/progress")}>Progress</Link>
-                            <Link to="/nutrition" className={isActive("/nutrition")}>Nutrition</Link>
-                            <Link to="/profile" className={isActive("/profile")}>Profile</Link>
+                            <Link to="/dashboard" className={isActive("/dashboard")}>{t("nav_dashboard")}</Link>
+                            <Link to="/workout" className={isActive("/workout")}>{t("nav_workout")}</Link>
+                            <Link to="/moodcheck" className={isActive("/moodcheck")}>{t("nav_moodcheck")}</Link>
+                            <Link to="/progress" className={isActive("/progress")}>{t("nav_progress")}</Link>
+                            <Link to="/nutrition" className={isActive("/nutrition")}>{t("nav_nutrition")}</Link>
+                            <Link to="/profile" className={isActive("/profile")}>{t("nav_profile")}</Link>
                         </>
                     ) : (
                         <>
@@ -141,22 +158,25 @@ const Navbar = () => {
                 </div>
 
                 <div className="gm-navbar-cta">
+                    <button className="gm-lang-toggle" onClick={toggleLang} title="Change language">
+                        {lang === "en" ? "🌐 ES" : "🌐 EN"}
+                    </button>
                     {token ? (
                         <>
-                            <Link to="/profile" className="gm-navbar-avatar" title="Profile">
+                            <Link to="/profile" className="gm-navbar-avatar" title={t("nav_profile")}>
                                 {user?.photo_url
                                     ? <img src={user.photo_url} alt="profile" />
                                     : (user?.first_name?.[0] || "U").toUpperCase()
                                 }
                             </Link>
                             <button className="gm-navbar-btn-logout" onClick={handleLogout}>
-                                Sign out
+                                {t("nav_signout")}
                             </button>
                         </>
                     ) : (
                         <>
-                            <Link to="/login" style={{ color: "#f0f4f8", textDecoration: "none", fontSize: "13px" }}>Login</Link>
-                            <Link to="/signup" className="gm-navbar-btn-login">Get started free</Link>
+                            <Link to="/login" style={{ color: "#f0f4f8", textDecoration: "none", fontSize: "13px" }}>{t("nav_login")}</Link>
+                            <Link to="/signup" className="gm-navbar-btn-login">{t("nav_getstarted")}</Link>
                         </>
                     )}
                 </div>
@@ -165,4 +185,4 @@ const Navbar = () => {
     );
 };
 
-export default Navbar; 
+export default Navbar;

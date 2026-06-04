@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { MobileNavbar } from "../components/MobileNavbar";
+import { useLang } from "../context/LanguageContext.jsx";
 
 const Profile = () => {
     const { store } = useGlobalReducer();
+    const { t, lang, toggleLang } = useLang();
     const userId = store.user?.id || JSON.parse(sessionStorage.getItem("user") || "{}").id;
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -12,7 +14,6 @@ const Profile = () => {
     const [error, setError] = useState(null);
     const [selectedGoal, setSelectedGoal] = useState("Gain muscle");
 
-    // Progress Photos
     const [photos, setPhotos] = useState([]);
     const [photoFilter, setPhotoFilter] = useState("all");
     const [visibleCount, setVisibleCount] = useState(9);
@@ -47,7 +48,6 @@ const Profile = () => {
             .catch(() => { });
     }, [userId]);
 
-    // ── Filtro de fotos ──────────────────────────────────────────────
     const getFilteredPhotos = () => {
         if (photoFilter === "all") return photos;
         const now = new Date();
@@ -57,7 +57,6 @@ const Profile = () => {
         return photos.filter(p => new Date(p.taken_at) >= cutoff);
     };
 
-    // ── Handlers ─────────────────────────────────────────────────────
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -116,16 +115,16 @@ const Profile = () => {
     };
 
     const goals = [
-        { id: "Lose fat", label: "Lose fat", sub: "Caloric deficit + cardio" },
-        { id: "Gain muscle", label: "Gain muscle", sub: "Caloric surplus + strength" },
-        { id: "Body recomposition", label: "Body recomposition", sub: "Maintenance calories + high protein" },
+        { id: "Lose fat", label: t("goal_losefat"), sub: t("goal_losefat_sub") },
+        { id: "Gain muscle", label: t("goal_gainmuscle"), sub: t("goal_gainmuscle_sub") },
+        { id: "Body recomposition", label: t("goal_recomp"), sub: t("goal_recomp_sub") },
     ];
 
     if (error) return <p style={{ color: "#ff4d4d", textAlign: "center", marginTop: "40px" }}>{error}</p>;
     if (!user) return (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#0a0a0a" }}>
             <div style={{ width: "48px", height: "48px", border: "4px solid #1a1a2e", borderTop: "4px solid #0066ff", borderRadius: "50%", animation: "spin 0.8s linear infinite" }}></div>
-            <p style={{ color: "#666", marginTop: "16px", fontSize: "14px" }}>Loading profile...</p>
+            <p style={{ color: "#666", marginTop: "16px", fontSize: "14px" }}>{t("loading_profile")}</p>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
     );
@@ -134,9 +133,8 @@ const Profile = () => {
     const age = calculateAge(user.date_of_birth);
     const memberSince = "May 2025";
 
-    // Datos de la galería
     const filteredPhotos = getFilteredPhotos();
-    const firstPhoto = photos[0]; // día 1 siempre
+    const firstPhoto = photos[0];
     const visiblePhotos = filteredPhotos.slice(0, visibleCount);
 
     return (
@@ -151,7 +149,6 @@ const Profile = () => {
 
                 .pf-body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
 
-                /* NAV */
                 .pf-nav { display: flex; align-items: center; height: 56px; background: rgba(8,12,16,0.97); border-bottom: 1px solid var(--border); padding: 0 20px; width: 100%; }
                 .pf-logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; color: var(--accent); white-space: nowrap; flex-shrink: 0; margin-right: 24px; }
                 .pf-nav-links { display: flex; gap: 24px; flex: 1; }
@@ -160,13 +157,13 @@ const Profile = () => {
                 .pf-nav-cta { display: flex; gap: 8px; align-items: center; flex-shrink: 0; margin-left: 24px; }
                 .pf-btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
                 .pf-btn-danger { background: transparent; border: 1px solid rgba(255,80,80,0.3); color: #ff6b6b; padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+                .pf-lang-btn { background: transparent; border: 1px solid rgba(0,229,255,0.35); color: #00e5ff; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; letter-spacing: 0.5px; transition: background 0.2s; }
+                .pf-lang-btn:hover { background: rgba(0,229,255,0.08); }
 
-                /* PAGE */
                 .pf-page { padding: 32px 24px; max-width: 1000px; margin: 0 auto; }
                 .pf-section-label { font-size: 12px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
                 .pf-page-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 2px; margin-bottom: 24px; }
 
-                /* HERO CARD */
                 .pf-hero { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 28px; display: flex; align-items: center; gap: 24px; margin-bottom: 20px; flex-wrap: wrap; }
                 .pf-avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #0066ff, #00c6ff); display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: white; flex-shrink: 0; border: 3px solid var(--accent); overflow: hidden; }
                 .pf-hero-info { flex: 1; }
@@ -183,21 +180,16 @@ const Profile = () => {
                 .pf-hero-stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
                 .pf-hero-stat-divider { width: 1px; background: var(--border); align-self: stretch; }
 
-                /* GRID */
                 .pf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-
-                /* CARDS */
                 .pf-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
                 .pf-card-title { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
 
-                /* INFO ROWS */
                 .pf-info-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
                 .pf-info-row:last-child { border-bottom: none; }
                 .pf-info-label { color: var(--muted); }
                 .pf-info-value { font-weight: 500; }
                 .pf-info-value.accent { color: var(--accent); font-weight: 600; }
 
-                /* GOALS */
                 .pf-goal-option { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
                 .pf-goal-option:last-child { margin-bottom: 0; }
                 .pf-goal-option.selected { border-color: var(--accent); background: rgba(0,229,255,0.06); }
@@ -206,42 +198,35 @@ const Profile = () => {
                 .pf-goal-label { font-size: 13px; font-weight: 600; }
                 .pf-goal-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
 
-                /* ── PROGRESS PHOTOS ── */
                 .pf-photos-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
                 .pf-photos-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
                 .pf-btn-add-photo { background: linear-gradient(135deg, #0066ff, #00c6ff); border: none; color: white; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 
-                /* Filtros */
                 .pf-filters { display: flex; gap: 8px; margin-bottom: 18px; overflow-x: auto; padding-bottom: 2px; }
                 .pf-filter-btn { padding: 5px 16px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
                 .pf-filter-btn.active { background: var(--accent); color: #080c10; border-color: var(--accent); font-weight: 700; }
                 .pf-filter-btn:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
 
-                /* Banner día 1 */
                 .pf-day1-banner { display: flex; align-items: center; gap: 10px; background: rgba(0,229,255,0.05); border: 1px solid rgba(0,229,255,0.15); border-radius: 10px; padding: 8px 14px; margin-bottom: 14px; }
                 .pf-day1-thumb { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 1px solid var(--accent); }
                 .pf-day1-label { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
                 .pf-day1-date { font-size: 11px; color: var(--muted); }
 
-                /* Grid */
                 .pf-photos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
                 @media (max-width: 576px) { .pf-photos-grid { grid-template-columns: repeat(2, 1fr); } }
 
                 .pf-photo-item { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 3/4; background: #111; }
                 .pf-photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
                 .pf-photo-badge { position: absolute; top: 6px; left: 6px; background: var(--accent); color: #080c10; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; letter-spacing: 0.5px; }
-                .pf-photo-date { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.65); color: #fff; font-size: 10px; padding: 5px 7px; text-align: center; }
+                .pf-photo-date { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.65); color: #fff; font-size:10px; padding: 5px 7px; text-align: center; }
                 .pf-photo-notes { position: absolute; bottom: 22px; left: 0; right: 0; background: rgba(0,0,0,0.45); color: #ccc; font-size: 10px; padding: 3px 7px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-                /* Load More */
                 .pf-load-more { text-align: center; margin-top: 16px; }
                 .pf-load-more-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 8px 24px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
                 .pf-load-more-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-                /* Empty */
                 .pf-photos-empty { text-align: center; padding: 32px; color: var(--muted); font-size: 13px; border: 1px dashed var(--border); border-radius: 12px; }
 
-                /* ── MODAL ── */
                 .pf-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
                 .pf-modal { background: #0d1318; border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 100%; max-width: 420px; }
                 .pf-modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; margin-bottom: 20px; }
@@ -251,23 +236,23 @@ const Profile = () => {
                 .pf-modal-input { display: none; }
                 .pf-modal-notes { width: 100%; background: #111; border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 10px 12px; font-size: 13px; font-family: 'DM Sans', sans-serif; resize: none; box-sizing: border-box; margin-bottom: 12px; }
                 .pf-modal-notes:focus { outline: none; border-color: var(--accent); }
-                .pf-modal-error { background: rgba(255,80,80,0.1); border: 1px solid rgba(255,80,80,0.3); color: #ff6b6b; border-radius: 8px; padding: 8px 12px; font-size: 12px; margin-bottom: 12px; }
+                .pf-modal-error { background: rgba(255,80,80,0.1); border: 1px solid rgba(255,80,80,0.3); color: #ff6b6b; border-radius:8px; padding: 8px 12px; font-size: 12px; margin-bottom: 12px; }
                 .pf-modal-actions { display: flex; gap: 10px; }
                 .pf-modal-cancel { flex: 1; background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 10px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
                 .pf-modal-submit { flex: 2; background: linear-gradient(135deg, #0066ff, #00c6ff); border: none; color: white; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
                 .pf-modal-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
-                /* DANGER ZONE */
                 .pf-danger { background: var(--bg2); border: 1px solid rgba(255,80,80,0.25); border-radius: 16px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
                 .pf-danger-title { color: #ff6b6b; font-weight: 600; font-size: 14px; margin-bottom: 4px; }
                 .pf-danger-sub { color: var(--muted); font-size: 12px; }
                 .pf-btn-delete { background: transparent; border: 1px solid rgba(255,80,80,0.4); color: #ff6b6b; padding: 8px 20px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500; }
                 .pf-btn-delete:hover { background: rgba(255,80,80,0.1); }
+
                 @media (max-width: 768px) {
-                .pf-nav {
-                    display: none !important;
+                    .pf-nav { display: none !important; }
+                    .pf-grid { grid-template-columns: 1fr; }
+                    .pf-hero-stats { display: none; }
                 }
-            }
             `}</style>
 
             <div className="pf-body">
@@ -277,27 +262,29 @@ const Profile = () => {
                 <nav className="pf-nav">
                     <div className="pf-logo">GymMind AI</div>
                     <div className="pf-nav-links">
-                        <a onClick={() => navigate("/dashboard")}>Dashboard</a>
-                        <a onClick={() => navigate("/workout")}>My Workout</a>
-                        <a onClick={() => navigate("/moodcheck")}>Mood Check</a>
-                        <a onClick={() => navigate("/progress")}>Progress</a>
-                        <a onClick={() => navigate("/nutrition")}>Nutrition</a>
-                        <a className="active">Profile</a>
+                        <a onClick={() => navigate("/dashboard")}>{t("nav_dashboard")}</a>
+                        <a onClick={() => navigate("/workout")}>{t("nav_workout")}</a>
+                        <a onClick={() => navigate("/moodcheck")}>{t("nav_moodcheck")}</a>
+                        <a onClick={() => navigate("/progress")}>{t("nav_progress")}</a>
+                        <a onClick={() => navigate("/nutrition")}>{t("nav_nutrition")}</a>
+                        <a className="active">{t("nav_profile")}</a>
                     </div>
                     <div className="pf-nav-cta">
-                        <button className="pf-btn-ghost" onClick={() => navigate("/edit-profile")}>Edit profile</button>
+                        <button className="pf-btn-ghost" onClick={() => navigate("/edit-profile")}>{t("profile_edit")}</button>
+                        <button className="pf-lang-btn" onClick={toggleLang}>
+                            {lang === "en" ? "🌐 ES" : "🌐 EN"}
+                        </button>
                         <button className="pf-btn-danger" onClick={() => {
                             sessionStorage.removeItem("token");
                             sessionStorage.removeItem("user");
                             navigate("/login");
-                        }}>Sign out</button>
+                        }}>{t("nav_signout")}</button>
                     </div>
                 </nav>
 
                 <div className="pf-page">
-
-                    <div className="pf-section-label">My Account</div>
-                    <div className="pf-page-title">MY PROFILE</div>
+                    <div className="pf-section-label">{t("profile_myaccount")}</div>
+                    <div className="pf-page-title">{t("profile_title")}</div>
 
                     {/* HERO */}
                     <div className="pf-hero">
@@ -311,42 +298,42 @@ const Profile = () => {
                             <div className="pf-hero-email">{user.email}</div>
                             <div className="pf-badges">
                                 <span className="pf-badge pf-badge-goal">🎯 {selectedGoal}</span>
-                                <span className="pf-badge pf-badge-streak">🔥 12 days trained</span>
+                                <span className="pf-badge pf-badge-streak">🔥 12 {t("profile_days_trained")}</span>
                             </div>
-                            <div className="pf-member-since">Member since {memberSince}</div>
+                            <div className="pf-member-since">{t("profile_member_since")} {memberSince}</div>
                         </div>
                         <div className="pf-hero-stats">
                             {user.weight && <>
                                 <div className="pf-hero-stat">
                                     <div className="pf-hero-stat-num">{user.weight}</div>
-                                    <div className="pf-hero-stat-label">Weight (kg)</div>
+                                    <div className="pf-hero-stat-label">{t("profile_weight_kg")}</div>
                                 </div>
                                 <div className="pf-hero-stat-divider" />
                             </>}
                             {user.height && <>
                                 <div className="pf-hero-stat">
                                     <div className="pf-hero-stat-num">{user.height}</div>
-                                    <div className="pf-hero-stat-label">Height (cm)</div>
+                                    <div className="pf-hero-stat-label">{t("profile_height_cm")}</div>
                                 </div>
                                 <div className="pf-hero-stat-divider" />
                             </>}
                             {age && <div className="pf-hero-stat">
                                 <div className="pf-hero-stat-num">{age}</div>
-                                <div className="pf-hero-stat-label">Age</div>
+                                <div className="pf-hero-stat-label">{t("profile_age")}</div>
                             </div>}
                         </div>
                     </div>
 
-                    {/* GRID — Personal Info + Fitness Goal */}
+                    {/* GRID */}
                     <div className="pf-grid">
                         <div className="pf-card">
-                            <div className="pf-card-title">🧍 Personal Information</div>
+                            <div className="pf-card-title">🧍 {t("info_title")}</div>
                             {[
-                                { label: "Full name", value: `${user.first_name} ${user.last_name}`, accent: false },
-                                { label: "Email", value: user.email, accent: false },
-                                { label: "Age", value: age ? `${age} years old` : null, accent: false },
-                                { label: "Height", value: user.height ? `${user.height} cm` : null, accent: true },
-                                { label: "Current weight", value: user.weight ? `${user.weight} kg` : null, accent: true },
+                                { label: t("info_fullname"), value: `${user.first_name} ${user.last_name}`, accent: false },
+                                { label: t("info_email"), value: user.email, accent: false },
+                                { label: t("profile_age"), value: age ? `${age} ${t("info_age")}` : null, accent: false },
+                                { label: t("info_height_label"), value: user.height ? `${user.height} cm` : null, accent: true },
+                                { label: t("info_weight_label"), value: user.weight ? `${user.weight} kg` : null, accent: true },
                             ].filter(i => i.value).map(item => (
                                 <div key={item.label} className="pf-info-row">
                                     <span className="pf-info-label">{item.label}</span>
@@ -356,7 +343,7 @@ const Profile = () => {
                         </div>
 
                         <div className="pf-card">
-                            <div className="pf-card-title">🎯 Fitness Goal</div>
+                            <div className="pf-card-title">🎯 {t("goals_title")}</div>
                             {goals.map(goal => (
                                 <div
                                     key={goal.id}
@@ -373,21 +360,20 @@ const Profile = () => {
                         </div>
                     </div>
 
-                    {/* ── PROGRESS PHOTOS ── */}
+                    {/* PROGRESS PHOTOS */}
                     <div className="pf-photos-card">
                         <div className="pf-photos-header">
-                            <div className="pf-card-title" style={{ margin: 0 }}>📸 Progress Photos</div>
+                            <div className="pf-card-title" style={{ margin: 0 }}>📸 {t("photos_title")}</div>
                             <button className="pf-btn-add-photo" onClick={() => { setShowPhotoModal(true); setUploadError(""); }}>
-                                + Add Photo
+                                {t("photos_add")}
                             </button>
                         </div>
 
-                        {/* Filtros */}
                         <div className="pf-filters">
                             {[
-                                { key: "all", label: "All" },
-                                { key: "biweekly", label: "Last 2 Weeks" },
-                                { key: "monthly", label: "Last Month" },
+                                { key: "all", label: t("photos_filter_all") },
+                                { key: "biweekly", label: t("photos_filter_biweekly") },
+                                { key: "monthly", label: t("photos_filter_monthly") },
                             ].map(f => (
                                 <button
                                     key={f.key}
@@ -399,21 +385,17 @@ const Profile = () => {
                             ))}
                         </div>
 
-                        {/* Contenido galería */}
                         {filteredPhotos.length === 0 ? (
                             <div className="pf-photos-empty">
-                                {photos.length === 0
-                                    ? "No progress photos yet. Add your first one to start tracking your transformation! 💪"
-                                    : "No photos in this time period. Try \"All\" to see everything."}
+                                {photos.length === 0 ? t("photos_empty_first") : t("photos_empty_filter")}
                             </div>
                         ) : (
                             <>
-                                {/* Banner día 1 — solo visible en filtros biweekly/monthly si la primera foto queda fuera */}
                                 {photoFilter !== "all" && firstPhoto && !filteredPhotos.includes(firstPhoto) && (
                                     <div className="pf-day1-banner">
                                         <img src={firstPhoto.photo_url} alt="Day 1" className="pf-day1-thumb" />
                                         <div>
-                                            <div className="pf-day1-label">📌 Day 1 Reference</div>
+                                            <div className="pf-day1-label">{t("photos_day1_label")}</div>
                                             <div className="pf-day1-date">
                                                 {new Date(firstPhoto.taken_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                                             </div>
@@ -421,7 +403,6 @@ const Profile = () => {
                                     </div>
                                 )}
 
-                                {/* Grid */}
                                 <div className="pf-photos-grid">
                                     {visiblePhotos.map((photo, index) => (
                                         <div key={photo.id} className="pf-photo-item">
@@ -429,9 +410,7 @@ const Profile = () => {
                                                 <span className="pf-photo-badge">DAY 1</span>
                                             )}
                                             <img src={photo.photo_url} alt={photo.notes || `Progress ${index + 1}`} />
-                                            {photo.notes && (
-                                                <div className="pf-photo-notes">{photo.notes}</div>
-                                            )}
+                                            {photo.notes && <div className="pf-photo-notes">{photo.notes}</div>}
                                             <div className="pf-photo-date">
                                                 {new Date(photo.taken_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                                             </div>
@@ -439,14 +418,10 @@ const Profile = () => {
                                     ))}
                                 </div>
 
-                                {/* Load More */}
                                 {visibleCount < filteredPhotos.length && (
                                     <div className="pf-load-more">
-                                        <button
-                                            className="pf-load-more-btn"
-                                            onClick={() => setVisibleCount(v => v + 9)}
-                                        >
-                                            Load more ({filteredPhotos.length - visibleCount} remaining)
+                                        <button className="pf-load-more-btn" onClick={() => setVisibleCount(v => v + 9)}>
+                                            {t("photos_load_more")} ({filteredPhotos.length - visibleCount} {t("photos_remaining")})
                                         </button>
                                     </div>
                                 )}
@@ -457,11 +432,11 @@ const Profile = () => {
                     {/* DANGER ZONE */}
                     <div className="pf-danger">
                         <div>
-                            <div className="pf-danger-title">Danger zone</div>
-                            <div className="pf-danger-sub">Once you delete your account, there is no going back.</div>
+                            <div className="pf-danger-title">{t("danger_title")}</div>
+                            <div className="pf-danger-sub">{t("danger_sub")}</div>
                         </div>
                         <button className="pf-btn-delete" onClick={() => {
-                            if (window.confirm("Are you sure you want to delete your account? This cannot be undone.")) {
+                            if (window.confirm(t("danger_confirm"))) {
                                 fetch(`${backendUrl}/api/user/${userId}`, { method: "DELETE" })
                                     .then(res => res.json())
                                     .then(() => {
@@ -469,68 +444,54 @@ const Profile = () => {
                                         sessionStorage.removeItem("user");
                                         navigate("/signup");
                                     })
-                                    .catch(() => alert("Could not delete account. Try again."));
+                                    .catch(() => alert(t("error_delete")));
                             }
                         }}>
-                            Delete account
+                            {t("danger_btn")}
                         </button>
                     </div>
-
                 </div>
             </div>
 
-            {/* ── MODAL UPLOAD PHOTO ── */}
+            {/* MODAL */}
             {showPhotoModal && (
                 <div className="pf-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}>
                     <div className="pf-modal">
-                        <div className="pf-modal-title">📸 Add Progress Photo</div>
+                        <div className="pf-modal-title">{t("modal_title")}</div>
 
                         {previewUrl
                             ? <img src={previewUrl} className="pf-modal-preview" alt="preview" />
                             : (
                                 <label className="pf-modal-upload-area" htmlFor="photo-input">
-                                    📁 Click to select a photo
+                                    {t("modal_click")}
                                     <br />
-                                    <span style={{ fontSize: "11px", marginTop: "6px", display: "block" }}>JPG, PNG, WEBP supported</span>
+                                    <span style={{ fontSize: "11px", marginTop: "6px", display: "block" }}>{t("modal_formats")}</span>
                                 </label>
                             )
                         }
 
-                        <input
-                            id="photo-input"
-                            type="file"
-                            accept="image/*"
-                            className="pf-modal-input"
-                            onChange={handleFileChange}
-                        />
+                        <input id="photo-input" type="file" accept="image/*" className="pf-modal-input" onChange={handleFileChange} />
 
                         {previewUrl && (
                             <label htmlFor="photo-input" style={{ display: "block", textAlign: "center", color: "var(--accent)", fontSize: "12px", cursor: "pointer", marginBottom: "12px" }}>
-                                Change photo
+                                {t("modal_change")}
                             </label>
                         )}
 
                         <textarea
                             className="pf-modal-notes"
-                            placeholder="Add a note (optional)... e.g. After 4 weeks of training"
+                            placeholder={t("modal_placeholder")}
                             rows={2}
                             value={photoNotes}
                             onChange={e => setPhotoNotes(e.target.value)}
                         />
 
-                        {/* Error message (ej: "You already uploaded a photo today") */}
-                        {uploadError && (
-                            <div className="pf-modal-error">⚠️ {uploadError}</div>
-                        )}
+                        {uploadError && <div className="pf-modal-error">⚠️ {uploadError}</div>}
 
                         <div className="pf-modal-actions">
-                            <button className="pf-modal-cancel" onClick={closeModal}>Cancel</button>
-                            <button
-                                className="pf-modal-submit"
-                                onClick={handleUploadPhoto}
-                                disabled={!photoFile || uploadingPhoto}
-                            >
-                                {uploadingPhoto ? "Uploading..." : "Save Photo"}
+                            <button className="pf-modal-cancel" onClick={closeModal}>{t("modal_cancel")}</button>
+                            <button className="pf-modal-submit" onClick={handleUploadPhoto} disabled={!photoFile || uploadingPhoto}>
+                                {uploadingPhoto ? t("modal_uploading") : t("modal_save")}
                             </button>
                         </div>
                     </div>
